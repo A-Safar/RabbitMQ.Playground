@@ -1,0 +1,9 @@
+ version: '3'
+ services:
+   rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: rabbit-mq
+    hostname: rabbit-mq
+    ports:
+       - "30001:5672"
+       - "30002:15672" 

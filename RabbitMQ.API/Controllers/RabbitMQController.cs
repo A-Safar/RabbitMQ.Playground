@@ -43,9 +43,10 @@ namespace RabbitMQ.API.Controllers
         public ActionResult Headers(Message message)
         {
             var headers = new Dictionary<string, object>
-                {
-               { "formatf", "pdf" },
-                { "format", "csv" }
+            {
+                {"extension", "pdf"},
+                {"format", "csv"},
+                {"type","data"}
             };
             rabbitMQService.HeadersPublish(message, headers);
 

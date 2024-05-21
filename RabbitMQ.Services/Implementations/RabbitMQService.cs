@@ -90,7 +90,7 @@ namespace Services.Implementations
             _channel.QueueDeclare("headers-q-2", durable: false, exclusive: false, autoDelete: false, arguments: null);
 
             // Bind the Queues to the Headers Exchange with headers
-            var headers1 = new Dictionary<string, object> { { "x-match", "any" }, { "formatf", "pdf" }, { "type", "report" } };
+            var headers1 = new Dictionary<string, object> { { "x-match", "any" }, { "extension", "pdf" }, { "category", "report" } };
             var headers2 = new Dictionary<string, object> { { "format", "csv" }, { "type", "data" } };
 
             _channel.QueueBind("headers-q-1", "headers-exchange", routingKey: "", arguments: headers1);

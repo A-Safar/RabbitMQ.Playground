@@ -14,7 +14,7 @@ namespace Services.Implementations
 
         public RabbitMQService() {
             _factory = new ConnectionFactory() { HostName = "localhost", Port = 30001 };
-            _connection = _factory.CreateConnection();
+            _connection = _factory.CreateConnection("RabbitMQ.Payground");
             _channel = _connection.CreateModel();
             _channel.ConfirmSelect();
 
@@ -50,30 +50,30 @@ namespace Services.Implementations
         
         private void SetupFanoutPublish()
         {
-            // Declare the Direct Exchange
+            // Declare the Fanout Exchange
             _channel.ExchangeDeclare("fanout-exchange", ExchangeType.Fanout);
-            
-            // Declare the Direct Queues
+
+            // Declare the Fanout Queues
             _channel.QueueDeclare("fanout-q-1", durable: false, exclusive: false, autoDelete: false, arguments: null);
             _channel.QueueDeclare("fanout-q-2", durable: false, exclusive: false, autoDelete: false, arguments: null);
 
-            // Bind the Direct Queue to the Direct Exchange
+            // Bind the Fanout Queue to the Fanout Exchange
             _channel.QueueBind("fanout-q-1", "fanout-exchange", routingKey: "doesn't matter");
             _channel.QueueBind("fanout-q-2", "fanout-exchange", routingKey: "doesn't matter");
         }
         
         private void SetupTopicPublish()
         {
-            // Declare the Direct Exchange
+            // Declare the Topic Exchange
             _channel.ExchangeDeclare("topic-exchange", ExchangeType.Topic);
-            
-            // Declare the Direct Queues
+
+            // Declare the Topic Queues
             _channel.QueueDeclare("topic-q-1", durable: false, exclusive: false, autoDelete: false, arguments: null);
             _channel.QueueDeclare("topic-q-2", durable: false, exclusive: false, autoDelete: false, arguments: null);
             _channel.QueueDeclare("topic-q-3", durable: false, exclusive: false, autoDelete: false, arguments: null);
             _channel.QueueDeclare("topic-q-4", durable: false, exclusive: false, autoDelete: false, arguments: null);
 
-            // Bind the Direct Queue to the Direct Exchange
+            // Bind the Topic Queue to the Topic Exchange
             _channel.QueueBind("topic-q-1", "topic-exchange", routingKey: "hot.topic");
             _channel.QueueBind("topic-q-2", "topic-exchange", routingKey: "hot.topic");
             _channel.QueueBind("topic-q-3", "topic-exchange", routingKey: "boring.topic");

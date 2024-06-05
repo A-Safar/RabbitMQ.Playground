@@ -93,8 +93,8 @@ namespace Services.Implementations
             var headers1 = new Dictionary<string, object> { { "x-match", "any" }, { "extension", "pdf" }, { "category", "report" } };
             var headers2 = new Dictionary<string, object> { { "format", "csv" }, { "type", "data" } };
 
-            _channel.QueueBind("headers-q-1", "headers-exchange", routingKey: "", arguments: headers1);
-            _channel.QueueBind("headers-q-2", "headers-exchange", routingKey: "", arguments: headers2);
+            _channel.QueueBind("headers-q-1", "headers-exchange", routingKey: string.Empty, arguments: headers1);
+            _channel.QueueBind("headers-q-2", "headers-exchange", routingKey: string.Empty, arguments: headers2);
         }
 
         public void FanoutPublish(Message message)

@@ -1,3 +1,4 @@
+using Services.Consumers;
 using Services.Contracts;
 using Services.Implementations;
 
@@ -12,7 +13,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
 
+// Listen for messages
+//builder.Services.AddHostedService<DirectQueue1Consumer>();
+
 var app = builder.Build();
+
+// Resolve IRabbitMQService to create the RabbitMQService instance and the queues
+var rabbitMqService = app.Services.GetRequiredService<IRabbitMQService>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

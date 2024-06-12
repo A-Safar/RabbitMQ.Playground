@@ -1,18 +1,20 @@
 ﻿using Domain;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using Services.Contracts;
 using System.Text;
 
 namespace Services.Implementations
 {
-    public class RabbitMQService : IRabbitMQService
+    public class RabbitMQService : IRabbitMQService, IDisposable
     {
         private readonly ConnectionFactory _factory;
         private readonly IConnection? _connection;
         private readonly IModel? _channel;
 
-        public RabbitMQService() {
+        public RabbitMQService()
+        {
             _factory = new ConnectionFactory() { HostName = "localhost", Port = 30001 };
             _connection = _factory.CreateConnection("RabbitMQ.Payground");
             _channel = _connection.CreateModel();
@@ -38,7 +40,7 @@ namespace Services.Implementations
         {
             // Declare the Direct Exchange
             _channel.ExchangeDeclare("direct-exchange", ExchangeType.Direct);
-            
+
             // Declare the Direct Queues
             _channel.QueueDeclare("direct-q-1", durable: false, exclusive: false, autoDelete: false, arguments: null);
             _channel.QueueDeclare("direct-q-2", durable: false, exclusive: false, autoDelete: false, arguments: null);
@@ -47,7 +49,7 @@ namespace Services.Implementations
             _channel.QueueBind("direct-q-1", "direct-exchange", routingKey: "d-q-1");
             _channel.QueueBind("direct-q-2", "direct-exchange", routingKey: "d-q-2");
         }
-        
+
         private void SetupFanoutPublish()
         {
             // Declare the Fanout Exchange
@@ -61,7 +63,7 @@ namespace Services.Implementations
             _channel.QueueBind("fanout-q-1", "fanout-exchange", routingKey: "doesn't matter");
             _channel.QueueBind("fanout-q-2", "fanout-exchange", routingKey: "doesn't matter");
         }
-        
+
         private void SetupTopicPublish()
         {
             // Declare the Topic Exchange
@@ -97,18 +99,18 @@ namespace Services.Implementations
             _channel.QueueBind("headers-q-2", "headers-exchange", routingKey: string.Empty, arguments: headers2);
         }
 
-        public void FanoutPublish(Message message)
-        {
-            var messageJson = JsonConvert.SerializeObject(message);
-            var body = Encoding.UTF8.GetBytes(messageJson);
-            _channel.BasicPublish(exchange: "fanout-exchange", routingKey: string.Empty, basicProperties: null, body: body);
-        }
-
         public void DirectPublish(Message message, string routingKey)
         {
             var messageJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(messageJson);
             _channel.BasicPublish(exchange: "direct-exchange", routingKey: routingKey, basicProperties: null, mandatory: true, body: body);
+        }
+
+        public void FanoutPublish(Message message)
+        {
+            var messageJson = JsonConvert.SerializeObject(message);
+            var body = Encoding.UTF8.GetBytes(messageJson);
+            _channel.BasicPublish(exchange: "fanout-exchange", routingKey: string.Empty, basicProperties: null, body: body);
         }
 
         public void TopicPublish(Message message, string topicName)
@@ -129,5 +131,10 @@ namespace Services.Implementations
             _channel.BasicPublish(exchange: "headers-exchange", routingKey: string.Empty, basicProperties: properties, body: body);
         }
 
+        public void Dispose()
+        {
+            _channel?.Dispose();
+            _connection?.Dispose();
+        }
     }
 }

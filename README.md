@@ -154,35 +154,35 @@ Access the RabbitMQ Management UI at `http://localhost:30002` to:
 
 ```mermaid
 graph TB
-    subgraph "Client Applications"
-        Client[HTTP Client/Browser]
-        Swagger[Swagger UI]
+    subgraph "👥 Client Applications"
+        Client[🌐 HTTP Client/Browser]
+        Swagger[📋 Swagger UI]
     end
 
-    subgraph "RabbitMQ.API Layer"
-        Controller[RabbitMQController]
-        API[ASP.NET Core Web API]
+    subgraph "🎯 RabbitMQ.API Layer"
+        Controller[🎮 RabbitMQController]
+        API[🚀 ASP.NET Core Web API]
     end
 
-    subgraph "RabbitMQ.Services Layer"
-        Interface[IRabbitMQService]
-        Service[RabbitMQService]
-        Consumer[DirectQueue1Consumer]
+    subgraph "⚙️ RabbitMQ.Services Layer"
+        Interface[📜 IRabbitMQService]
+        Service[🔧 RabbitMQService]
+        Consumer[👂 DirectQueue1Consumer]
     end
 
-    subgraph "RabbitMQ.Domain Layer"
-        Message[Message Entity]
+    subgraph "📊 RabbitMQ.Domain Layer"
+        Message[💌 Message Entity]
     end
 
-    subgraph "RabbitMQ Broker"
-        DirectEx[Direct Exchange]
-        FanoutEx[Fanout Exchange]
-        TopicEx[Topic Exchange]
-        HeadersEx[Headers Exchange]
-        Queue1[direct-q-1]
-        Queue2[fanout-q-1]
-        Queue3[topic-q-1]
-        Queue4[headers-q-1]
+    subgraph "🐰 RabbitMQ Broker"
+        DirectEx[🎯 Direct Exchange]
+        FanoutEx[📢 Fanout Exchange]
+        TopicEx[🏷️ Topic Exchange]
+        HeadersEx[📝 Headers Exchange]
+        Queue1[📥 direct-q-1]
+        Queue2[📥 fanout-q-1]
+        Queue3[📥 topic-q-1]
+        Queue4[📥 headers-q-1]
     end
 
     %% Client interactions
@@ -225,35 +225,35 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant API as RabbitMQ.API
-    participant Service as RabbitMQService
-    participant RMQ as RabbitMQ Broker
-    participant Consumer as DirectQueue1Consumer
+    participant Client as 👤 Client
+    participant API as 🚀 RabbitMQ.API
+    participant Service as ⚙️ RabbitMQService
+    participant RMQ as 🐰 RabbitMQ Broker
+    participant Consumer as 👂 DirectQueue1Consumer
 
     %% Publishing Flow
-    Client->>API: POST /RabbitMQ/direct
-    Note over Client,API: Message: {"id": 1, "content": "Hello"}
-    API->>Service: DirectPublish(message, routingKey)
-    Service->>RMQ: Publish to Direct Exchange
-    RMQ->>RMQ: Route to direct-q-1 queue
+    Client->>API: 📤 POST /RabbitMQ/direct
+    Note over Client,API: 💌 Message: {"id": 1, "content": "Hello"}
+    API->>Service: 🎯 DirectPublish(message, routingKey)
+    Service->>RMQ: 📨 Publish to Direct Exchange
+    RMQ->>RMQ: 🔀 Route to direct-q-1 queue
     
     %% Consuming Flow
-    Consumer->>RMQ: Listen on direct-q-1
-    RMQ-->>Consumer: Deliver message
-    Consumer->>Consumer: Process message
-    Note over Consumer: Console.WriteLine("Message received")
+    Consumer->>RMQ: 👂 Listen on direct-q-1
+    RMQ-->>Consumer: 📬 Deliver message
+    Consumer->>Consumer: ⚡ Process message
+    Note over Consumer: 📺 Console.WriteLine("Message received")
     
     %% Response
-    Service-->>API: Success
-    API-->>Client: 200 OK "Message published successfully!"
+    Service-->>API: ✅ Success
+    API-->>Client: 🎉 200 OK "Message published successfully!"
 
     %% Other Exchange Types
     rect rgb(240, 248, 255)
-        Note over Client,Consumer: Similar flows for Fanout, Topic, and Headers exchanges
-        Client->>API: POST /RabbitMQ/fanout
-        Client->>API: POST /RabbitMQ/topic
-        Client->>API: POST /RabbitMQ/headers
+        Note over Client,Consumer: 🔄 Similar flows for Fanout, Topic, and Headers exchanges
+        Client->>API: 📢 POST /RabbitMQ/fanout
+        Client->>API: 🏷️ POST /RabbitMQ/topic
+        Client->>API: 📝 POST /RabbitMQ/headers
     end
 ```
 
@@ -261,25 +261,25 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    subgraph "Presentation Layer"
-        A[Controllers]
-        B[Swagger/OpenAPI]
+    subgraph "🎨 Presentation Layer"
+        A[🎮 Controllers]
+        B[📋 Swagger/OpenAPI]
     end
     
-    subgraph "Business Layer"
-        C[IRabbitMQService]
-        D[RabbitMQService Implementation]
-        E[Background Consumers]
+    subgraph "🏢 Business Layer"
+        C[📜 IRabbitMQService]
+        D[⚙️ RabbitMQService Implementation]
+        E[👂 Background Consumers]
     end
     
-    subgraph "Domain Layer"
-        F[Message Model]
-        G[Domain Contracts]
+    subgraph "📊 Domain Layer"
+        F[💌 Message Model]
+        G[📋 Domain Contracts]
     end
     
-    subgraph "Infrastructure"
-        H[RabbitMQ Client]
-        I[Docker Container]
+    subgraph "🔧 Infrastructure"
+        H[🐰 RabbitMQ Client]
+        I[🐳 Docker Container]
     end
     
     A --> C

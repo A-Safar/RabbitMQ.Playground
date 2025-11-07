@@ -152,18 +152,171 @@ Access the RabbitMQ Management UI at `http://localhost:30002` to:
 
 ## 🏗️ Architecture
 
-### Domain Layer (`RabbitMQ.Domain`)
+```mermaid
+graph TB
+    subgraph "Client Applications"
+        Client[HTTP Client/Browser]
+        Swagger[Swagger UI]
+    end
+
+    subgraph "RabbitMQ.API Layer"
+        Controller[RabbitMQController]
+        API[ASP.NET Core Web API]
+    end
+
+    subgraph "RabbitMQ.Services Layer"
+        Interface[IRabbitMQService]
+        Service[RabbitMQService]
+        Consumer[DirectQueue1Consumer]
+    end
+
+    subgraph "RabbitMQ.Domain Layer"
+        Message[Message Entity]
+    end
+
+    subgraph "RabbitMQ Broker"
+        DirectEx[Direct Exchange]
+        FanoutEx[Fanout Exchange]
+        TopicEx[Topic Exchange]
+        HeadersEx[Headers Exchange]
+        Queue1[direct-q-1]
+        Queue2[fanout-q-1]
+        Queue3[topic-q-1]
+        Queue4[headers-q-1]
+    end
+
+    %% Client interactions
+    Client --> API
+    Swagger --> API
+    
+    %% API Layer
+    API --> Controller
+    Controller --> Interface
+    
+    %% Service Layer
+    Interface --> Service
+    Service --> Message
+    Consumer --> Queue1
+    
+    %% RabbitMQ Flow
+    Service --> DirectEx
+    Service --> FanoutEx
+    Service --> TopicEx
+    Service --> HeadersEx
+    
+    DirectEx --> Queue1
+    FanoutEx --> Queue2
+    TopicEx --> Queue3
+    HeadersEx --> Queue4
+    
+    %% Styling
+    classDef apiLayer fill:#e1f5fe
+    classDef serviceLayer fill:#f3e5f5
+    classDef domainLayer fill:#e8f5e8
+    classDef rabbitLayer fill:#fff3e0
+    
+    class Controller,API apiLayer
+    class Interface,Service,Consumer serviceLayer
+    class Message domainLayer
+    class DirectEx,FanoutEx,TopicEx,HeadersEx,Queue1,Queue2,Queue3,Queue4 rabbitLayer
+```
+
+## 📊 Message Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as RabbitMQ.API
+    participant Service as RabbitMQService
+    participant RMQ as RabbitMQ Broker
+    participant Consumer as DirectQueue1Consumer
+
+    %% Publishing Flow
+    Client->>API: POST /RabbitMQ/direct
+    Note over Client,API: Message: {"id": 1, "content": "Hello"}
+    API->>Service: DirectPublish(message, routingKey)
+    Service->>RMQ: Publish to Direct Exchange
+    RMQ->>RMQ: Route to direct-q-1 queue
+    
+    %% Consuming Flow
+    Consumer->>RMQ: Listen on direct-q-1
+    RMQ-->>Consumer: Deliver message
+    Consumer->>Consumer: Process message
+    Note over Consumer: Console.WriteLine("Message received")
+    
+    %% Response
+    Service-->>API: Success
+    API-->>Client: 200 OK "Message published successfully!"
+
+    %% Other Exchange Types
+    rect rgb(240, 248, 255)
+        Note over Client,Consumer: Similar flows for Fanout, Topic, and Headers exchanges
+        Client->>API: POST /RabbitMQ/fanout
+        Client->>API: POST /RabbitMQ/topic
+        Client->>API: POST /RabbitMQ/headers
+    end
+```
+
+## 🏛️ Component Architecture
+
+```mermaid
+graph LR
+    subgraph "Presentation Layer"
+        A[Controllers]
+        B[Swagger/OpenAPI]
+    end
+    
+    subgraph "Business Layer"
+        C[IRabbitMQService]
+        D[RabbitMQService Implementation]
+        E[Background Consumers]
+    end
+    
+    subgraph "Domain Layer"
+        F[Message Model]
+        G[Domain Contracts]
+    end
+    
+    subgraph "Infrastructure"
+        H[RabbitMQ Client]
+        I[Docker Container]
+    end
+    
+    A --> C
+    B --> A
+    C --> D
+    D --> F
+    D --> H
+    E --> H
+    H --> I
+    
+    classDef presentation fill:#ffebee
+    classDef business fill:#e8f5e8
+    classDef domain fill:#e3f2fd
+    classDef infrastructure fill:#fafafa
+    
+    class A,B presentation
+    class C,D,E business
+    class F,G domain
+    class H,I infrastructure
+```
+
+### Layer Descriptions
+
+#### Domain Layer (`RabbitMQ.Domain`)
 - Contains the `Message` entity with `Id` and `Content` properties
+- Pure domain models with no external dependencies
 
-### Services Layer (`RabbitMQ.Services`)
-- **Contracts**: `IRabbitMQService` interface
+#### Services Layer (`RabbitMQ.Services`)
+- **Contracts**: `IRabbitMQService` interface defining messaging operations
 - **Implementations**: `RabbitMQService` with all exchange type implementations
-- **Consumers**: Background services for message consumption
+- **Consumers**: Background services for message consumption (`DirectQueue1Consumer`)
 
-### API Layer (`RabbitMQ.API`)
-- RESTful controllers for message publishing
-- Swagger/OpenAPI integration
-- Dependency injection setup
+#### API Layer (`RabbitMQ.API`)
+- RESTful controllers for message publishing endpoints
+- Swagger/OpenAPI integration for API documentation
+- Dependency injection container setup
+- Cross-cutting concerns (logging, error handling)
 
 ## 🧪 Testing the Application
 
